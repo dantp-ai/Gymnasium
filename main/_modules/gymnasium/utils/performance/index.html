@@ -7,11 +7,11 @@
     <meta property="og:title" content="Gymnasium Documentation" />
     <meta property="og:type" content="website" />
     <meta property="og:description" content="A standard API for reinforcement learning and a diverse set of reference environments (formerly Gym)" />
-    <meta property="og:url" content="https://gymnasium.farama.org/_modules/gymnasium/spaces/sequence.html" /><meta property="og:image" content="https://gymnasium.farama.org/_static/img/gymnasium-github.png" /><meta name="twitter:card" content="summary_large_image"><link rel="index" title="Index" href="../../../../genindex/" /><link rel="search" title="Search" href="../../../../search/" />
-        <link rel="canonical" href="https://gymnasium.farama.org/_modules/gymnasium/spaces/sequence.html" />
+    <meta property="og:url" content="https://gymnasium.farama.org/_modules/gymnasium/utils/performance.html" /><meta property="og:image" content="https://gymnasium.farama.org/_static/img/gymnasium-github.png" /><meta name="twitter:card" content="summary_large_image"><link rel="index" title="Index" href="../../../../genindex/" /><link rel="search" title="Search" href="../../../../search/" />
+        <link rel="canonical" href="https://gymnasium.farama.org/_modules/gymnasium/utils/performance.html" />
 
     <link rel="shortcut icon" href="../../../../_static/favicon.png"/><!-- Generated with Sphinx 7.4.7 and Furo 2023.08.19.dev1 -->
-        <title>gymnasium.spaces.sequence - Gymnasium Documentation</title>
+        <title>gymnasium.utils.performance - Gymnasium Documentation</title>
       <link rel="stylesheet" type="text/css" href="../../../../_static/pygments.css?v=a746c00c" />
     <link rel="stylesheet" type="text/css" href="../../../../_static/styles/furo.css?v=3e7f4c72" />
     <link rel="stylesheet" type="text/css" href="../../../../_static/sg_gallery.css?v=61a4c737" />
@@ -469,227 +469,116 @@
           </div>
           <article role="main">
             
-            <h1>Source code for gymnasium.spaces.sequence</h1><div class="highlight"><pre>
-<span></span><span class="sd">&quot;&quot;&quot;Implementation of a space that represents finite-length sequences.&quot;&quot;&quot;</span>
+            <h1>Source code for gymnasium.utils.performance</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;A collection of runtime performance bencharks, useful for debugging performance related issues.&quot;&quot;&quot;</span>
 
-<span class="kn">from</span> <span class="nn">__future__</span> <span class="kn">import</span> <span class="n">annotations</span>
+<span class="kn">import</span> <span class="nn">time</span>
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Callable</span>
 
-<span class="kn">import</span> <span class="nn">typing</span>
-<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Any</span><span class="p">,</span> <span class="n">Union</span>
-
-<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
-<span class="kn">from</span> <span class="nn">numpy.typing</span> <span class="kn">import</span> <span class="n">NDArray</span>
-
-<span class="kn">import</span> <span class="nn">gymnasium</span> <span class="k">as</span> <span class="nn">gym</span>
-<span class="kn">from</span> <span class="nn">gymnasium.spaces.space</span> <span class="kn">import</span> <span class="n">Space</span>
+<span class="kn">import</span> <span class="nn">gymnasium</span>
 
 
-<div class="viewcode-block" id="Sequence">
-<a class="viewcode-back" href="../../../../api/spaces/composite/#gymnasium.spaces.Sequence">[docs]</a>
-<span class="k">class</span> <span class="nc">Sequence</span><span class="p">(</span><span class="n">Space</span><span class="p">[</span><span class="n">Union</span><span class="p">[</span><span class="n">typing</span><span class="o">.</span><span class="n">Tuple</span><span class="p">[</span><span class="n">Any</span><span class="p">,</span> <span class="o">...</span><span class="p">],</span> <span class="n">Any</span><span class="p">]]):</span>
-<span class="w">    </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;This space represent sets of finite-length sequences.</span>
+<div class="viewcode-block" id="benchmark_step">
+<a class="viewcode-back" href="../../../../api/utils/#gymnasium.utils.performance.benchmark_step">[docs]</a>
+<span class="k">def</span> <span class="nf">benchmark_step</span><span class="p">(</span><span class="n">env</span><span class="p">:</span> <span class="n">gymnasium</span><span class="o">.</span><span class="n">Env</span><span class="p">,</span> <span class="n">target_duration</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">5</span><span class="p">,</span> <span class="n">seed</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;A benchmark to measure the runtime performance of step for an environment.</span>
 
-<span class="sd">    This space represents the set of tuples of the form :math:`(a_0, \dots, a_n)` where the :math:`a_i` belong</span>
-<span class="sd">    to some space that is specified during initialization and the integer :math:`n` is not fixed</span>
+<span class="sd">    example usage:</span>
+<span class="sd">        ```py</span>
+<span class="sd">        env_old = ...</span>
+<span class="sd">        old_throughput = benchmark_step(env_old)</span>
+<span class="sd">        env_new = ...</span>
+<span class="sd">        new_throughput = benchmark_step(env_old)</span>
+<span class="sd">        slowdown = old_throughput / new_throughput</span>
+<span class="sd">        ```</span>
 
-<span class="sd">    Example:</span>
-<span class="sd">        &gt;&gt;&gt; from gymnasium.spaces import Sequence, Box</span>
-<span class="sd">        &gt;&gt;&gt; observation_space = Sequence(Box(0, 1), seed=0)</span>
-<span class="sd">        &gt;&gt;&gt; observation_space.sample()</span>
-<span class="sd">        (array([0.6822636], dtype=float32), array([0.18933342], dtype=float32), array([0.19049619], dtype=float32))</span>
-<span class="sd">        &gt;&gt;&gt; observation_space.sample()</span>
-<span class="sd">        (array([0.83506], dtype=float32), array([0.9053838], dtype=float32), array([0.5836242], dtype=float32), array([0.63214064], dtype=float32))</span>
+<span class="sd">    Args:</span>
+<span class="sd">        env: the environment to benchmarked.</span>
+<span class="sd">        target_duration: the duration of the benchmark in seconds (note: it will go slightly over it).</span>
+<span class="sd">        seed: seeds the environment and action sampled.</span>
 
-<span class="sd">    Example with stacked observations</span>
-<span class="sd">        &gt;&gt;&gt; observation_space = Sequence(Box(0, 1), stack=True, seed=0)</span>
-<span class="sd">        &gt;&gt;&gt; observation_space.sample()</span>
-<span class="sd">        array([[0.6822636 ],</span>
-<span class="sd">               [0.18933342],</span>
-<span class="sd">               [0.19049619]], dtype=float32)</span>
+<span class="sd">    Returns: the average steps per second.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">steps</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="n">end</span> <span class="o">=</span> <span class="mf">0.0</span>
+    <span class="n">env</span><span class="o">.</span><span class="n">reset</span><span class="p">(</span><span class="n">seed</span><span class="o">=</span><span class="n">seed</span><span class="p">)</span>
+    <span class="n">env</span><span class="o">.</span><span class="n">action_space</span><span class="o">.</span><span class="n">sample</span><span class="p">()</span>
+    <span class="n">start</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
 
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
-        <span class="bp">self</span><span class="p">,</span>
-        <span class="n">space</span><span class="p">:</span> <span class="n">Space</span><span class="p">[</span><span class="n">Any</span><span class="p">],</span>
-        <span class="n">seed</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">Generator</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-        <span class="n">stack</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
-    <span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Constructor of the :class:`Sequence` space.</span>
+    <span class="k">while</span> <span class="kc">True</span><span class="p">:</span>
+        <span class="n">steps</span> <span class="o">+=</span> <span class="mi">1</span>
+        <span class="n">action</span> <span class="o">=</span> <span class="n">env</span><span class="o">.</span><span class="n">action_space</span><span class="o">.</span><span class="n">sample</span><span class="p">()</span>
+        <span class="n">_</span><span class="p">,</span> <span class="n">_</span><span class="p">,</span> <span class="n">terminal</span><span class="p">,</span> <span class="n">truncated</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">env</span><span class="o">.</span><span class="n">step</span><span class="p">(</span><span class="n">action</span><span class="p">)</span>
 
-<span class="sd">        Args:</span>
-<span class="sd">            space: Elements in the sequences this space represent must belong to this space.</span>
-<span class="sd">            seed: Optionally, you can use this argument to seed the RNG that is used to sample from the space.</span>
-<span class="sd">            stack: If ``True`` then the resulting samples would be stacked.</span>
-<span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span>
-            <span class="n">space</span><span class="p">,</span> <span class="n">Space</span>
-        <span class="p">),</span> <span class="sa">f</span><span class="s2">&quot;Expects the feature space to be instance of a gym Space, actual type: </span><span class="si">{</span><span class="nb">type</span><span class="p">(</span><span class="n">space</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">feature_space</span> <span class="o">=</span> <span class="n">space</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">stack</span> <span class="o">=</span> <span class="n">stack</span>
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">stack</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">stacked_feature_space</span><span class="p">:</span> <span class="n">Space</span> <span class="o">=</span> <span class="n">gym</span><span class="o">.</span><span class="n">vector</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">batch_space</span><span class="p">(</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">feature_space</span><span class="p">,</span> <span class="mi">1</span>
-            <span class="p">)</span>
+        <span class="k">if</span> <span class="n">terminal</span> <span class="ow">or</span> <span class="n">truncated</span><span class="p">:</span>
+            <span class="n">env</span><span class="o">.</span><span class="n">reset</span><span class="p">()</span>
 
-        <span class="c1"># None for shape and dtype, since it&#39;ll require special handling</span>
-        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="n">seed</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span> <span class="o">-</span> <span class="n">start</span> <span class="o">&gt;</span> <span class="n">target_duration</span><span class="p">:</span>
+            <span class="n">end</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
+            <span class="k">break</span>
 
-<div class="viewcode-block" id="Sequence.seed">
-<a class="viewcode-back" href="../../../../api/spaces/composite/#gymnasium.spaces.Sequence.seed">[docs]</a>
-    <span class="k">def</span> <span class="nf">seed</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">seed</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">int</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">int</span><span class="p">]:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Seed the PRNG of the Sequence space and the feature space.</span>
+    <span class="n">length</span> <span class="o">=</span> <span class="n">end</span> <span class="o">-</span> <span class="n">start</span>
 
-<span class="sd">        Depending on the type of seed, the subspaces will be seeded differently</span>
-
-<span class="sd">        * ``None`` - All the subspaces will use a random initial seed</span>
-<span class="sd">        * ``Int`` - The integer is used to seed the :class:`Sequence` space that is used to generate a seed value for the feature space.</span>
-<span class="sd">        * ``Tuple of ints`` - A tuple for the :class:`Sequence` and feature space.</span>
-
-<span class="sd">        Args:</span>
-<span class="sd">            seed: An optional int or tuple of ints to seed the PRNG. See above for more details</span>
-
-<span class="sd">        Returns:</span>
-<span class="sd">            A tuple of the seeding values for the Sequence and feature space</span>
-<span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">if</span> <span class="n">seed</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="k">return</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">seed</span><span class="p">(</span><span class="kc">None</span><span class="p">),</span> <span class="bp">self</span><span class="o">.</span><span class="n">feature_space</span><span class="o">.</span><span class="n">seed</span><span class="p">(</span><span class="kc">None</span><span class="p">)</span>
-        <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">seed</span><span class="p">,</span> <span class="nb">int</span><span class="p">):</span>
-            <span class="n">super_seed</span> <span class="o">=</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">seed</span><span class="p">(</span><span class="n">seed</span><span class="p">)</span>
-            <span class="n">feature_seed</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">np_random</span><span class="o">.</span><span class="n">integers</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">iinfo</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">int32</span><span class="p">)</span><span class="o">.</span><span class="n">max</span><span class="p">))</span>
-            <span class="c1"># this is necessary such that after int or list/tuple seeding, the Sequence PRNG are equivalent</span>
-            <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">seed</span><span class="p">(</span><span class="n">seed</span><span class="p">)</span>
-            <span class="k">return</span> <span class="n">super_seed</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">feature_space</span><span class="o">.</span><span class="n">seed</span><span class="p">(</span><span class="n">feature_seed</span><span class="p">)</span>
-        <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">seed</span><span class="p">,</span> <span class="p">(</span><span class="nb">tuple</span><span class="p">,</span> <span class="nb">list</span><span class="p">)):</span>
-            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">seed</span><span class="p">)</span> <span class="o">!=</span> <span class="mi">2</span><span class="p">:</span>
-                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
-                    <span class="sa">f</span><span class="s2">&quot;Expects the seed to have two elements for the Sequence and feature space, actual length: </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">seed</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span>
-                <span class="p">)</span>
-            <span class="k">return</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">seed</span><span class="p">(</span><span class="n">seed</span><span class="p">[</span><span class="mi">0</span><span class="p">]),</span> <span class="bp">self</span><span class="o">.</span><span class="n">feature_space</span><span class="o">.</span><span class="n">seed</span><span class="p">(</span><span class="n">seed</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span>
-                <span class="sa">f</span><span class="s2">&quot;Expected None, int, tuple of ints, actual type: </span><span class="si">{</span><span class="nb">type</span><span class="p">(</span><span class="n">seed</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span>
-            <span class="p">)</span></div>
+    <span class="n">steps_per_time</span> <span class="o">=</span> <span class="n">steps</span> <span class="o">/</span> <span class="n">length</span>
+    <span class="k">return</span> <span class="n">steps_per_time</span></div>
 
 
-    <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">is_np_flattenable</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Checks whether this space can be flattened to a :class:`spaces.Box`.&quot;&quot;&quot;</span>
-        <span class="k">return</span> <span class="kc">False</span>
 
-<div class="viewcode-block" id="Sequence.sample">
-<a class="viewcode-back" href="../../../../api/spaces/composite/#gymnasium.spaces.Sequence.sample">[docs]</a>
-    <span class="k">def</span> <span class="nf">sample</span><span class="p">(</span>
-        <span class="bp">self</span><span class="p">,</span>
-        <span class="n">mask</span><span class="p">:</span> <span class="kc">None</span> <span class="o">|</span> <span class="p">(</span>
-            <span class="nb">tuple</span><span class="p">[</span>
-                <span class="kc">None</span> <span class="o">|</span> <span class="n">np</span><span class="o">.</span><span class="n">integer</span> <span class="o">|</span> <span class="n">NDArray</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">integer</span><span class="p">],</span>
-                <span class="n">Any</span><span class="p">,</span>
-            <span class="p">]</span>
-        <span class="p">)</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-    <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="n">Any</span><span class="p">]</span> <span class="o">|</span> <span class="n">Any</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Generates a single random sample from this space.</span>
+<div class="viewcode-block" id="benchmark_init">
+<a class="viewcode-back" href="../../../../api/utils/#gymnasium.utils.performance.benchmark_init">[docs]</a>
+<span class="k">def</span> <span class="nf">benchmark_init</span><span class="p">(</span>
+    <span class="n">env_lambda</span><span class="p">:</span> <span class="n">Callable</span><span class="p">[[],</span> <span class="n">gymnasium</span><span class="o">.</span><span class="n">Env</span><span class="p">],</span> <span class="n">target_duration</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">5</span><span class="p">,</span> <span class="n">seed</span><span class="o">=</span><span class="kc">None</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;A benchmark to measure the initialization time and first reset.</span>
 
-<span class="sd">        Args:</span>
-<span class="sd">            mask: An optional mask for (optionally) the length of the sequence and (optionally) the values in the sequence.</span>
-<span class="sd">                If you specify ``mask``, it is expected to be a tuple of the form ``(length_mask, sample_mask)`` where ``length_mask`` is</span>
+<span class="sd">    Args:</span>
+<span class="sd">        env_lambda: the function to initialize the environment.</span>
+<span class="sd">        target_duration: the duration of the benchmark in seconds (note: it will go slightly over it).</span>
+<span class="sd">        seed: seeds the first reset of the environment.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">inits</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="n">end</span> <span class="o">=</span> <span class="mf">0.0</span>
+    <span class="n">start</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
+    <span class="k">while</span> <span class="kc">True</span><span class="p">:</span>
+        <span class="n">inits</span> <span class="o">+=</span> <span class="mi">1</span>
+        <span class="n">env</span> <span class="o">=</span> <span class="n">env_lambda</span><span class="p">()</span>
+        <span class="n">env</span><span class="o">.</span><span class="n">reset</span><span class="p">(</span><span class="n">seed</span><span class="o">=</span><span class="n">seed</span><span class="p">)</span>
 
-<span class="sd">                * ``None`` The length will be randomly drawn from a geometric distribution</span>
-<span class="sd">                * ``np.ndarray`` of integers, in which case the length of the sampled sequence is randomly drawn from this array.</span>
-<span class="sd">                * ``int`` for a fixed length sample</span>
+        <span class="k">if</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span> <span class="o">-</span> <span class="n">start</span> <span class="o">&gt;</span> <span class="n">target_duration</span><span class="p">:</span>
+            <span class="n">end</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
+            <span class="k">break</span>
+    <span class="n">length</span> <span class="o">=</span> <span class="n">end</span> <span class="o">-</span> <span class="n">start</span>
 
-<span class="sd">                The second element of the mask tuple ``sample`` mask specifies a mask that is applied when</span>
-<span class="sd">                sampling elements from the base space. The mask is applied for each feature space sample.</span>
-
-<span class="sd">        Returns:</span>
-<span class="sd">            A tuple of random length with random samples of elements from the :attr:`feature_space`.</span>
-<span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">if</span> <span class="n">mask</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="n">length_mask</span><span class="p">,</span> <span class="n">feature_mask</span> <span class="o">=</span> <span class="n">mask</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="n">length_mask</span><span class="p">,</span> <span class="n">feature_mask</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span>
-
-        <span class="k">if</span> <span class="n">length_mask</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">issubdtype</span><span class="p">(</span><span class="nb">type</span><span class="p">(</span><span class="n">length_mask</span><span class="p">),</span> <span class="n">np</span><span class="o">.</span><span class="n">integer</span><span class="p">):</span>
-                <span class="k">assert</span> <span class="p">(</span>
-                    <span class="mi">0</span> <span class="o">&lt;=</span> <span class="n">length_mask</span>
-                <span class="p">),</span> <span class="sa">f</span><span class="s2">&quot;Expects the length mask to be greater than or equal to zero, actual value: </span><span class="si">{</span><span class="n">length_mask</span><span class="si">}</span><span class="s2">&quot;</span>
-                <span class="n">length</span> <span class="o">=</span> <span class="n">length_mask</span>
-            <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">length_mask</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">):</span>
-                <span class="k">assert</span> <span class="p">(</span>
-                    <span class="nb">len</span><span class="p">(</span><span class="n">length_mask</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span>
-                <span class="p">),</span> <span class="sa">f</span><span class="s2">&quot;Expects the shape of the length mask to be 1-dimensional, actual shape: </span><span class="si">{</span><span class="n">length_mask</span><span class="o">.</span><span class="n">shape</span><span class="si">}</span><span class="s2">&quot;</span>
-                <span class="k">assert</span> <span class="n">np</span><span class="o">.</span><span class="n">all</span><span class="p">(</span>
-                    <span class="mi">0</span> <span class="o">&lt;=</span> <span class="n">length_mask</span>
-                <span class="p">),</span> <span class="sa">f</span><span class="s2">&quot;Expects all values in the length_mask to be greater than or equal to zero, actual values: </span><span class="si">{</span><span class="n">length_mask</span><span class="si">}</span><span class="s2">&quot;</span>
-                <span class="k">assert</span> <span class="n">np</span><span class="o">.</span><span class="n">issubdtype</span><span class="p">(</span>
-                    <span class="n">length_mask</span><span class="o">.</span><span class="n">dtype</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">integer</span>
-                <span class="p">),</span> <span class="sa">f</span><span class="s2">&quot;Expects the length mask array to have dtype to be an numpy integer, actual type: </span><span class="si">{</span><span class="n">length_mask</span><span class="o">.</span><span class="n">dtype</span><span class="si">}</span><span class="s2">&quot;</span>
-                <span class="n">length</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">np_random</span><span class="o">.</span><span class="n">choice</span><span class="p">(</span><span class="n">length_mask</span><span class="p">)</span>
-            <span class="k">else</span><span class="p">:</span>
-                <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span>
-                    <span class="sa">f</span><span class="s2">&quot;Expects the type of length_mask to an integer or a np.ndarray, actual type: </span><span class="si">{</span><span class="nb">type</span><span class="p">(</span><span class="n">length_mask</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span>
-                <span class="p">)</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="c1"># The choice of 0.25 is arbitrary</span>
-            <span class="n">length</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">np_random</span><span class="o">.</span><span class="n">geometric</span><span class="p">(</span><span class="mf">0.25</span><span class="p">)</span>
-
-        <span class="c1"># Generate sample values from feature_space.</span>
-        <span class="n">sampled_values</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">feature_space</span><span class="o">.</span><span class="n">sample</span><span class="p">(</span><span class="n">mask</span><span class="o">=</span><span class="n">feature_mask</span><span class="p">)</span> <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">length</span><span class="p">)</span>
-        <span class="p">)</span>
-
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">stack</span><span class="p">:</span>
-            <span class="c1"># Concatenate values if stacked.</span>
-            <span class="n">out</span> <span class="o">=</span> <span class="n">gym</span><span class="o">.</span><span class="n">vector</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">create_empty_array</span><span class="p">(</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">feature_space</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">sampled_values</span><span class="p">)</span>
-            <span class="p">)</span>
-            <span class="k">return</span> <span class="n">gym</span><span class="o">.</span><span class="n">vector</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">concatenate</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">feature_space</span><span class="p">,</span> <span class="n">sampled_values</span><span class="p">,</span> <span class="n">out</span><span class="p">)</span>
-
-        <span class="k">return</span> <span class="n">sampled_values</span></div>
+    <span class="n">inits_per_time</span> <span class="o">=</span> <span class="n">inits</span> <span class="o">/</span> <span class="n">length</span>
+    <span class="k">return</span> <span class="n">inits_per_time</span></div>
 
 
-    <span class="k">def</span> <span class="nf">contains</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">:</span> <span class="n">Any</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Return boolean specifying if x is a valid member of this space.&quot;&quot;&quot;</span>
-        <span class="c1"># by definition, any sequence is an iterable</span>
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">stack</span><span class="p">:</span>
-            <span class="k">return</span> <span class="nb">all</span><span class="p">(</span>
-                <span class="n">item</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">feature_space</span>
-                <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="n">gym</span><span class="o">.</span><span class="n">vector</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">iterate</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">stacked_feature_space</span><span class="p">,</span> <span class="n">x</span><span class="p">)</span>
-            <span class="p">)</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="k">return</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="nb">tuple</span><span class="p">)</span> <span class="ow">and</span> <span class="nb">all</span><span class="p">(</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">feature_space</span><span class="o">.</span><span class="n">contains</span><span class="p">(</span><span class="n">item</span><span class="p">)</span> <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="n">x</span>
-            <span class="p">)</span>
 
-    <span class="k">def</span> <span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Gives a string representation of this space.&quot;&quot;&quot;</span>
-        <span class="k">return</span> <span class="sa">f</span><span class="s2">&quot;Sequence(</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">feature_space</span><span class="si">}</span><span class="s2">, stack=</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">stack</span><span class="si">}</span><span class="s2">)&quot;</span>
+<div class="viewcode-block" id="benchmark_render">
+<a class="viewcode-back" href="../../../../api/utils/#gymnasium.utils.performance.benchmark_render">[docs]</a>
+<span class="k">def</span> <span class="nf">benchmark_render</span><span class="p">(</span><span class="n">env</span><span class="p">:</span> <span class="n">gymnasium</span><span class="o">.</span><span class="n">Env</span><span class="p">,</span> <span class="n">target_duration</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">5</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;A benchmark to measure the time of render().</span>
 
-    <span class="k">def</span> <span class="nf">to_jsonable</span><span class="p">(</span>
-        <span class="bp">self</span><span class="p">,</span> <span class="n">sample_n</span><span class="p">:</span> <span class="n">typing</span><span class="o">.</span><span class="n">Sequence</span><span class="p">[</span><span class="nb">tuple</span><span class="p">[</span><span class="n">Any</span><span class="p">,</span> <span class="o">...</span><span class="p">]</span> <span class="o">|</span> <span class="n">Any</span><span class="p">]</span>
-    <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="nb">list</span><span class="p">[</span><span class="n">Any</span><span class="p">]]:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Convert a batch of samples from this space to a JSONable data type.&quot;&quot;&quot;</span>
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">stack</span><span class="p">:</span>
-            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">stacked_feature_space</span><span class="o">.</span><span class="n">to_jsonable</span><span class="p">(</span><span class="n">sample_n</span><span class="p">)</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="k">return</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">feature_space</span><span class="o">.</span><span class="n">to_jsonable</span><span class="p">(</span><span class="n">sample</span><span class="p">)</span> <span class="k">for</span> <span class="n">sample</span> <span class="ow">in</span> <span class="n">sample_n</span><span class="p">]</span>
+<span class="sd">    Note: does not work with `render_mode=&#39;human&#39;`</span>
+<span class="sd">    Args:</span>
+<span class="sd">        env: the environment to benchmarked (Note: must be renderable).</span>
+<span class="sd">        target_duration: the duration of the benchmark in seconds (note: it will go slightly over it).</span>
 
-    <span class="k">def</span> <span class="nf">from_jsonable</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">sample_n</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">list</span><span class="p">[</span><span class="n">Any</span><span class="p">]])</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="nb">tuple</span><span class="p">[</span><span class="n">Any</span><span class="p">,</span> <span class="o">...</span><span class="p">]</span> <span class="o">|</span> <span class="n">Any</span><span class="p">]:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Convert a JSONable data type to a batch of samples from this space.&quot;&quot;&quot;</span>
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">stack</span><span class="p">:</span>
-            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">stacked_feature_space</span><span class="o">.</span><span class="n">from_jsonable</span><span class="p">(</span><span class="n">sample_n</span><span class="p">)</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="k">return</span> <span class="p">[</span>
-                <span class="nb">tuple</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">feature_space</span><span class="o">.</span><span class="n">from_jsonable</span><span class="p">(</span><span class="n">sample</span><span class="p">))</span> <span class="k">for</span> <span class="n">sample</span> <span class="ow">in</span> <span class="n">sample_n</span>
-            <span class="p">]</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">renders</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="n">end</span> <span class="o">=</span> <span class="mf">0.0</span>
+    <span class="n">start</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
+    <span class="k">while</span> <span class="kc">True</span><span class="p">:</span>
+        <span class="n">renders</span> <span class="o">+=</span> <span class="mi">1</span>
+        <span class="n">env</span><span class="o">.</span><span class="n">render</span><span class="p">()</span>
 
-    <span class="k">def</span> <span class="fm">__eq__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">:</span> <span class="n">Any</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Check whether ``other`` is equivalent to this instance.&quot;&quot;&quot;</span>
-        <span class="k">return</span> <span class="p">(</span>
-            <span class="nb">isinstance</span><span class="p">(</span><span class="n">other</span><span class="p">,</span> <span class="n">Sequence</span><span class="p">)</span>
-            <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">feature_space</span> <span class="o">==</span> <span class="n">other</span><span class="o">.</span><span class="n">feature_space</span>
-            <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">stack</span> <span class="o">==</span> <span class="n">other</span><span class="o">.</span><span class="n">stack</span>
-        <span class="p">)</span></div>
+        <span class="k">if</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span> <span class="o">-</span> <span class="n">start</span> <span class="o">&gt;</span> <span class="n">target_duration</span><span class="p">:</span>
+            <span class="n">end</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
+            <span class="k">break</span>
+    <span class="n">length</span> <span class="o">=</span> <span class="n">end</span> <span class="o">-</span> <span class="n">start</span>
+
+    <span class="n">renders_per_time</span> <span class="o">=</span> <span class="n">renders</span> <span class="o">/</span> <span class="n">length</span>
+    <span class="k">return</span> <span class="n">renders_per_time</span></div>
 
 </pre></div>
           </article>

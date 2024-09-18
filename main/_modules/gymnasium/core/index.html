@@ -10,7 +10,7 @@
     <meta property="og:url" content="https://gymnasium.farama.org/_modules/gymnasium/core.html" /><meta property="og:image" content="https://gymnasium.farama.org/_static/img/gymnasium-github.png" /><meta name="twitter:card" content="summary_large_image"><link rel="index" title="Index" href="../../../genindex/" /><link rel="search" title="Search" href="../../../search/" />
         <link rel="canonical" href="https://gymnasium.farama.org/_modules/gymnasium/core.html" />
 
-    <link rel="shortcut icon" href="../../../_static/favicon.png"/><!-- Generated with Sphinx 7.2.6 and Furo 2023.08.19.dev1 -->
+    <link rel="shortcut icon" href="../../../_static/favicon.png"/><!-- Generated with Sphinx 7.4.7 and Furo 2023.08.19.dev1 -->
         <title>gymnasium.core - Gymnasium Documentation</title>
       <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=a746c00c" />
     <link rel="stylesheet" type="text/css" href="../../../_static/styles/furo.css?v=3e7f4c72" />
@@ -395,7 +395,7 @@
 <li class="toctree-l2"><a class="reference internal" href="../../../environments/atari/zaxxon/">Zaxxon</a></li>
 </ul>
 </li>
-<li class="toctree-l1"><a class="reference internal" href="../../../environments/third_party_environments/">Third-Party Environments</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../environments/third_party_environments/">External Environments</a></li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">Tutorials</span></p>
 <ul>
@@ -414,11 +414,11 @@
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="../../../tutorials/third-party-tutorials/">Third-Party Tutorials</a></li>
-<li class="toctree-l1"><a class="reference external" href="https://www.comet.com/docs/v2/integrations/ml-frameworks/gymnasium/?utm_source=gymnasium&amp;utm_medium=partner&amp;utm_campaign=partner_gymnasium_2023&amp;utm_content=docs_gymnasium">Comet Tutorial</a></li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">Development</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference external" href="https://github.com/Farama-Foundation/Gymnasium">Github</a></li>
+<li class="toctree-l1"><a class="reference external" href="https://arxiv.org/abs/2407.17032">Paper</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../gymnasium_release_notes/">Gymnasium Release Notes</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../gym_release_notes/">Gym Release Notes</a></li>
 <li class="toctree-l1"><a class="reference external" href="https://github.com/Farama-Foundation/Gymnasium/blob/main/docs/README.md">Contribute to the Docs</a></li>
@@ -471,6 +471,7 @@
             
             <h1>Source code for gymnasium.core</h1><div class="highlight"><pre>
 <span></span><span class="sd">&quot;&quot;&quot;Core API for Environment, Wrapper, ActionWrapper, RewardWrapper and ObservationWrapper.&quot;&quot;&quot;</span>
+
 <span class="kn">from</span> <span class="nn">__future__</span> <span class="kn">import</span> <span class="n">annotations</span>
 
 <span class="kn">from</span> <span class="nn">copy</span> <span class="kn">import</span> <span class="n">deepcopy</span>
@@ -478,6 +479,7 @@
 
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
 
+<span class="kn">import</span> <span class="nn">gymnasium</span>
 <span class="kn">from</span> <span class="nn">gymnasium</span> <span class="kn">import</span> <span class="n">spaces</span>
 <span class="kn">from</span> <span class="nn">gymnasium.utils</span> <span class="kn">import</span> <span class="n">RecordConstructorArgs</span><span class="p">,</span> <span class="n">seeding</span>
 
@@ -512,7 +514,7 @@
 <span class="sd">    - :attr:`action_space` - The Space object corresponding to valid actions, all valid actions should be contained within the space.</span>
 <span class="sd">    - :attr:`observation_space` - The Space object corresponding to valid observations, all valid observations should be contained within the space.</span>
 <span class="sd">    - :attr:`spec` - An environment spec that contains the information used to initialize the environment from :meth:`gymnasium.make`</span>
-<span class="sd">    - :attr:`metadata` - The metadata of the environment, i.e. render modes, render fps</span>
+<span class="sd">    - :attr:`metadata` - The metadata of the environment, e.g., `{&quot;render_modes&quot;: [&quot;rgb_array&quot;, &quot;human&quot;], &quot;render_fps&quot;: 30}`. For Jax or Torch, this can be indicated to users with `&quot;jax&quot;=True` or `&quot;torch&quot;=True`.</span>
 <span class="sd">    - :attr:`np_random` - The random number generator for the environment. This is automatically assigned during</span>
 <span class="sd">      ``super().reset(seed=seed)`` and when assessing :attr:`np_random`.</span>
 
@@ -749,6 +751,10 @@
         <span class="c1"># propagate exception</span>
         <span class="k">return</span> <span class="kc">False</span>
 
+    <span class="k">def</span> <span class="nf">has_wrapper_attr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Checks if the attribute `name` exists in the environment.&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">)</span>
+
     <span class="k">def</span> <span class="nf">get_wrapper_attr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Any</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Gets the attribute `name` from the environment.&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">)</span>
@@ -832,7 +838,7 @@
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">np_random_seed</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span> <span class="o">|</span> <span class="kc">None</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Returns the base enviroment&#39;s :attr:`np_random_seed`.&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Returns the base environment&#39;s :attr:`np_random_seed`.&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">env</span><span class="o">.</span><span class="n">np_random_seed</span>
 
     <span class="nd">@property</span>
@@ -869,8 +875,14 @@
             <span class="p">)</span>
 
             <span class="c1"># to avoid reference issues we deepcopy the prior environments spec and add the new information</span>
-            <span class="n">env_spec</span> <span class="o">=</span> <span class="n">deepcopy</span><span class="p">(</span><span class="n">env_spec</span><span class="p">)</span>
-            <span class="n">env_spec</span><span class="o">.</span><span class="n">additional_wrappers</span> <span class="o">+=</span> <span class="p">(</span><span class="n">wrapper_spec</span><span class="p">,)</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">env_spec</span> <span class="o">=</span> <span class="n">deepcopy</span><span class="p">(</span><span class="n">env_spec</span><span class="p">)</span>
+                <span class="n">env_spec</span><span class="o">.</span><span class="n">additional_wrappers</span> <span class="o">+=</span> <span class="p">(</span><span class="n">wrapper_spec</span><span class="p">,)</span>
+            <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+                <span class="n">gymnasium</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span>
+                    <span class="sa">f</span><span class="s2">&quot;An exception occurred (</span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s2">) while copying the environment spec=</span><span class="si">{</span><span class="n">env_spec</span><span class="si">}</span><span class="s2">&quot;</span>
+                <span class="p">)</span>
+                <span class="k">return</span> <span class="kc">None</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">_cached_spec</span> <span class="o">=</span> <span class="n">env_spec</span>
         <span class="k">return</span> <span class="n">env_spec</span>
@@ -888,6 +900,13 @@
             <span class="n">kwargs</span><span class="o">=</span><span class="n">kwargs</span><span class="p">,</span>
         <span class="p">)</span></div>
 
+
+    <span class="k">def</span> <span class="nf">has_wrapper_attr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Checks if the given attribute is within the wrapper or its environment.&quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">):</span>
+            <span class="k">return</span> <span class="kc">True</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">env</span><span class="o">.</span><span class="n">has_wrapper_attr</span><span class="p">(</span><span class="n">name</span><span class="p">)</span>
 
 <div class="viewcode-block" id="Wrapper.get_wrapper_attr">
 <a class="viewcode-back" href="../../../api/wrappers/#gymnasium.Wrapper.get_wrapper_attr">[docs]</a>
@@ -1264,8 +1283,8 @@
         })()
       </script>
 
-    <script src="../../../_static/documentation_options.js?v=ed34540e"></script>
-    <script src="../../../_static/doctools.js?v=888ff710"></script>
+    <script src="../../../_static/documentation_options.js?v=3596a5a1"></script>
+    <script src="../../../_static/doctools.js?v=9a2dae69"></script>
     <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../../../_static/scripts/furo.js?v=7660844c"></script>
     

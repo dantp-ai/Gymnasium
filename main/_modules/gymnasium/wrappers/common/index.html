@@ -10,7 +10,7 @@
     <meta property="og:url" content="https://gymnasium.farama.org/_modules/gymnasium/wrappers/common.html" /><meta property="og:image" content="https://gymnasium.farama.org/_static/img/gymnasium-github.png" /><meta name="twitter:card" content="summary_large_image"><link rel="index" title="Index" href="../../../../genindex/" /><link rel="search" title="Search" href="../../../../search/" />
         <link rel="canonical" href="https://gymnasium.farama.org/_modules/gymnasium/wrappers/common.html" />
 
-    <link rel="shortcut icon" href="../../../../_static/favicon.png"/><!-- Generated with Sphinx 7.2.6 and Furo 2023.08.19.dev1 -->
+    <link rel="shortcut icon" href="../../../../_static/favicon.png"/><!-- Generated with Sphinx 7.4.7 and Furo 2023.08.19.dev1 -->
         <title>gymnasium.wrappers.common - Gymnasium Documentation</title>
       <link rel="stylesheet" type="text/css" href="../../../../_static/pygments.css?v=a746c00c" />
     <link rel="stylesheet" type="text/css" href="../../../../_static/styles/furo.css?v=3e7f4c72" />
@@ -395,7 +395,7 @@
 <li class="toctree-l2"><a class="reference internal" href="../../../../environments/atari/zaxxon/">Zaxxon</a></li>
 </ul>
 </li>
-<li class="toctree-l1"><a class="reference internal" href="../../../../environments/third_party_environments/">Third-Party Environments</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../environments/third_party_environments/">External Environments</a></li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">Tutorials</span></p>
 <ul>
@@ -414,11 +414,11 @@
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="../../../../tutorials/third-party-tutorials/">Third-Party Tutorials</a></li>
-<li class="toctree-l1"><a class="reference external" href="https://www.comet.com/docs/v2/integrations/ml-frameworks/gymnasium/?utm_source=gymnasium&amp;utm_medium=partner&amp;utm_campaign=partner_gymnasium_2023&amp;utm_content=docs_gymnasium">Comet Tutorial</a></li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">Development</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference external" href="https://github.com/Farama-Foundation/Gymnasium">Github</a></li>
+<li class="toctree-l1"><a class="reference external" href="https://arxiv.org/abs/2407.17032">Paper</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../../gymnasium_release_notes/">Gymnasium Release Notes</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../../gym_release_notes/">Gym Release Notes</a></li>
 <li class="toctree-l1"><a class="reference external" href="https://github.com/Farama-Foundation/Gymnasium/blob/main/docs/README.md">Contribute to the Docs</a></li>
@@ -478,6 +478,7 @@
 <span class="sd">* ``OrderEnforcing`` - Enforces the order of function calls to environments</span>
 <span class="sd">* ``RecordEpisodeStatistics`` - Records the episode statistics</span>
 <span class="sd">&quot;&quot;&quot;</span>
+
 <span class="kn">from</span> <span class="nn">__future__</span> <span class="kn">import</span> <span class="n">annotations</span>
 
 <span class="kn">import</span> <span class="nn">time</span>
@@ -569,8 +570,11 @@
 
 <span class="sd">        Args:</span>
 <span class="sd">            env: The environment to apply the wrapper</span>
-<span class="sd">            max_episode_steps: An optional max episode steps (if ``None``, ``env.spec.max_episode_steps`` is used)</span>
+<span class="sd">            max_episode_steps: the environment step after which the episode is truncated (``elapsed &gt;= max_episode_steps``)</span>
 <span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">assert</span> <span class="p">(</span>
+            <span class="nb">isinstance</span><span class="p">(</span><span class="n">max_episode_steps</span><span class="p">,</span> <span class="nb">int</span><span class="p">)</span> <span class="ow">and</span> <span class="n">max_episode_steps</span> <span class="o">&gt;</span> <span class="mi">0</span>
+        <span class="p">),</span> <span class="sa">f</span><span class="s2">&quot;Expect the `max_episode_steps` to be positive, actually: </span><span class="si">{</span><span class="n">max_episode_steps</span><span class="si">}</span><span class="s2">&quot;</span>
         <span class="n">gym</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">RecordConstructorArgs</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span>
             <span class="bp">self</span><span class="p">,</span> <span class="n">max_episode_steps</span><span class="o">=</span><span class="n">max_episode_steps</span>
         <span class="p">)</span>
@@ -623,8 +627,14 @@
 
         <span class="n">env_spec</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">env</span><span class="o">.</span><span class="n">spec</span>
         <span class="k">if</span> <span class="n">env_spec</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="n">env_spec</span> <span class="o">=</span> <span class="n">deepcopy</span><span class="p">(</span><span class="n">env_spec</span><span class="p">)</span>
-            <span class="n">env_spec</span><span class="o">.</span><span class="n">max_episode_steps</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_max_episode_steps</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">env_spec</span> <span class="o">=</span> <span class="n">deepcopy</span><span class="p">(</span><span class="n">env_spec</span><span class="p">)</span>
+                <span class="n">env_spec</span><span class="o">.</span><span class="n">max_episode_steps</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_max_episode_steps</span>
+            <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+                <span class="n">gym</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span>
+                    <span class="sa">f</span><span class="s2">&quot;An exception occurred (</span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s2">) while copying the environment spec=</span><span class="si">{</span><span class="n">env_spec</span><span class="si">}</span><span class="s2">&quot;</span>
+                <span class="p">)</span>
+                <span class="k">return</span> <span class="kc">None</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">_cached_spec</span> <span class="o">=</span> <span class="n">env_spec</span>
         <span class="k">return</span> <span class="n">env_spec</span></div>
@@ -636,28 +646,9 @@
 <span class="k">class</span> <span class="nc">Autoreset</span><span class="p">(</span>
     <span class="n">gym</span><span class="o">.</span><span class="n">Wrapper</span><span class="p">[</span><span class="n">ObsType</span><span class="p">,</span> <span class="n">ActType</span><span class="p">,</span> <span class="n">ObsType</span><span class="p">,</span> <span class="n">ActType</span><span class="p">],</span> <span class="n">gym</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">RecordConstructorArgs</span>
 <span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;The wrapped environment is automatically reset when an terminated or truncated state is reached.</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;The wrapped environment is automatically reset when a terminated or truncated state is reached.</span>
 
-<span class="sd">    When calling step causes :meth:`Env.step` to return `terminated=True` or `truncated=True`, :meth:`Env.reset` is called,</span>
-<span class="sd">    and the return format of :meth:`self.step` is as follows: ``(new_obs, final_reward, final_terminated, final_truncated, info)``</span>
-<span class="sd">    with new step API and ``(new_obs, final_reward, final_done, info)`` with the old step API.</span>
-<span class="sd">    No vector version of the wrapper exists.</span>
-
-<span class="sd">     - ``obs`` is the first observation after calling :meth:`self.env.reset`</span>
-<span class="sd">     - ``final_reward`` is the reward after calling :meth:`self.env.step`, prior to calling :meth:`self.env.reset`.</span>
-<span class="sd">     - ``final_terminated`` is the terminated value before calling :meth:`self.env.reset`.</span>
-<span class="sd">     - ``final_truncated`` is the truncated value before calling :meth:`self.env.reset`. Both `final_terminated` and `final_truncated` cannot be False.</span>
-<span class="sd">     - ``info`` is a dict containing all the keys from the info dict returned by the call to :meth:`self.env.reset`,</span>
-<span class="sd">       with an additional key &quot;final_observation&quot; containing the observation returned by the last call to :meth:`self.env.step`</span>
-<span class="sd">       and &quot;final_info&quot; containing the info dict returned by the last call to :meth:`self.env.step`.</span>
-
-<span class="sd">    Warning:</span>
-<span class="sd">        When using this wrapper to collect rollouts, note that when :meth:`Env.step` returns `terminated` or `truncated`, a</span>
-<span class="sd">        new observation from after calling :meth:`Env.reset` is returned by :meth:`Env.step` alongside the</span>
-<span class="sd">        final reward, terminated and truncated state from the previous episode.</span>
-<span class="sd">        If you need the final state from the previous episode, you need to retrieve it via the</span>
-<span class="sd">        &quot;final_observation&quot; key in the info dict.</span>
-<span class="sd">        Make sure you know what you&#39;re doing if you use this wrapper!</span>
+<span class="sd">    This follows the vector autoreset api where on the step after an episode terminates or truncated then the environment is reset.</span>
 
 <span class="sd">    Change logs:</span>
 <span class="sd">     * v0.24.0 - Initially added as `AutoResetWrapper`</span>
@@ -799,8 +790,14 @@
 
         <span class="n">env_spec</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">env</span><span class="o">.</span><span class="n">spec</span>
         <span class="k">if</span> <span class="n">env_spec</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="n">env_spec</span> <span class="o">=</span> <span class="n">deepcopy</span><span class="p">(</span><span class="n">env_spec</span><span class="p">)</span>
-            <span class="n">env_spec</span><span class="o">.</span><span class="n">disable_env_checker</span> <span class="o">=</span> <span class="kc">False</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">env_spec</span> <span class="o">=</span> <span class="n">deepcopy</span><span class="p">(</span><span class="n">env_spec</span><span class="p">)</span>
+                <span class="n">env_spec</span><span class="o">.</span><span class="n">disable_env_checker</span> <span class="o">=</span> <span class="kc">False</span>
+            <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+                <span class="n">gym</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span>
+                    <span class="sa">f</span><span class="s2">&quot;An exception occurred (</span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s2">) while copying the environment spec=</span><span class="si">{</span><span class="n">env_spec</span><span class="si">}</span><span class="s2">&quot;</span>
+                <span class="p">)</span>
+                <span class="k">return</span> <span class="kc">None</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">_cached_spec</span> <span class="o">=</span> <span class="n">env_spec</span>
         <span class="k">return</span> <span class="n">env_spec</span>
@@ -907,8 +904,14 @@
 
         <span class="n">env_spec</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">env</span><span class="o">.</span><span class="n">spec</span>
         <span class="k">if</span> <span class="n">env_spec</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="n">env_spec</span> <span class="o">=</span> <span class="n">deepcopy</span><span class="p">(</span><span class="n">env_spec</span><span class="p">)</span>
-            <span class="n">env_spec</span><span class="o">.</span><span class="n">order_enforce</span> <span class="o">=</span> <span class="kc">True</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">env_spec</span> <span class="o">=</span> <span class="n">deepcopy</span><span class="p">(</span><span class="n">env_spec</span><span class="p">)</span>
+                <span class="n">env_spec</span><span class="o">.</span><span class="n">order_enforce</span> <span class="o">=</span> <span class="kc">True</span>
+            <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+                <span class="n">gym</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span>
+                    <span class="sa">f</span><span class="s2">&quot;An exception occurred (</span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s2">) while copying the environment spec=</span><span class="si">{</span><span class="n">env_spec</span><span class="si">}</span><span class="s2">&quot;</span>
+                <span class="p">)</span>
+                <span class="k">return</span> <span class="kc">None</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">_cached_spec</span> <span class="o">=</span> <span class="n">env_spec</span>
         <span class="k">return</span> <span class="n">env_spec</span></div>
@@ -941,10 +944,6 @@
 <span class="sd">    For a vectorized environments the output will be in the form of::</span>
 
 <span class="sd">        &gt;&gt;&gt; infos = {</span>
-<span class="sd">        ...     &quot;final_observation&quot;: &quot;&lt;array of length num-envs&gt;&quot;,</span>
-<span class="sd">        ...     &quot;_final_observation&quot;: &quot;&lt;boolean array of length num-envs&gt;&quot;,</span>
-<span class="sd">        ...     &quot;final_info&quot;: &quot;&lt;array of length num-envs&gt;&quot;,</span>
-<span class="sd">        ...     &quot;_final_info&quot;: &quot;&lt;boolean array of length num-envs&gt;&quot;,</span>
 <span class="sd">        ...     &quot;episode&quot;: {</span>
 <span class="sd">        ...         &quot;r&quot;: &quot;&lt;array of cumulative reward&gt;&quot;,</span>
 <span class="sd">        ...         &quot;l&quot;: &quot;&lt;array of episode length&gt;&quot;,</span>
@@ -1152,8 +1151,8 @@
         })()
       </script>
 
-    <script src="../../../../_static/documentation_options.js?v=ed34540e"></script>
-    <script src="../../../../_static/doctools.js?v=888ff710"></script>
+    <script src="../../../../_static/documentation_options.js?v=3596a5a1"></script>
+    <script src="../../../../_static/doctools.js?v=9a2dae69"></script>
     <script src="../../../../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../../../../_static/scripts/furo.js?v=7660844c"></script>
     

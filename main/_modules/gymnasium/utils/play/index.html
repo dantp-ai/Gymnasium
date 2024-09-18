@@ -10,7 +10,7 @@
     <meta property="og:url" content="https://gymnasium.farama.org/_modules/gymnasium/utils/play.html" /><meta property="og:image" content="https://gymnasium.farama.org/_static/img/gymnasium-github.png" /><meta name="twitter:card" content="summary_large_image"><link rel="index" title="Index" href="../../../../genindex/" /><link rel="search" title="Search" href="../../../../search/" />
         <link rel="canonical" href="https://gymnasium.farama.org/_modules/gymnasium/utils/play.html" />
 
-    <link rel="shortcut icon" href="../../../../_static/favicon.png"/><!-- Generated with Sphinx 7.2.6 and Furo 2023.08.19.dev1 -->
+    <link rel="shortcut icon" href="../../../../_static/favicon.png"/><!-- Generated with Sphinx 7.4.7 and Furo 2023.08.19.dev1 -->
         <title>gymnasium.utils.play - Gymnasium Documentation</title>
       <link rel="stylesheet" type="text/css" href="../../../../_static/pygments.css?v=a746c00c" />
     <link rel="stylesheet" type="text/css" href="../../../../_static/styles/furo.css?v=3e7f4c72" />
@@ -395,7 +395,7 @@
 <li class="toctree-l2"><a class="reference internal" href="../../../../environments/atari/zaxxon/">Zaxxon</a></li>
 </ul>
 </li>
-<li class="toctree-l1"><a class="reference internal" href="../../../../environments/third_party_environments/">Third-Party Environments</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../environments/third_party_environments/">External Environments</a></li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">Tutorials</span></p>
 <ul>
@@ -414,11 +414,11 @@
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="../../../../tutorials/third-party-tutorials/">Third-Party Tutorials</a></li>
-<li class="toctree-l1"><a class="reference external" href="https://www.comet.com/docs/v2/integrations/ml-frameworks/gymnasium/?utm_source=gymnasium&amp;utm_medium=partner&amp;utm_campaign=partner_gymnasium_2023&amp;utm_content=docs_gymnasium">Comet Tutorial</a></li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">Development</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference external" href="https://github.com/Farama-Foundation/Gymnasium">Github</a></li>
+<li class="toctree-l1"><a class="reference external" href="https://arxiv.org/abs/2407.17032">Paper</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../../gymnasium_release_notes/">Gymnasium Release Notes</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../../gym_release_notes/">Gym Release Notes</a></li>
 <li class="toctree-l1"><a class="reference external" href="https://github.com/Farama-Foundation/Gymnasium/blob/main/docs/README.md">Contribute to the Docs</a></li>
@@ -471,6 +471,7 @@
             
             <h1>Source code for gymnasium.utils.play</h1><div class="highlight"><pre>
 <span></span><span class="sd">&quot;&quot;&quot;Utilities of visualising an environment.&quot;&quot;&quot;</span>
+
 <span class="kn">from</span> <span class="nn">__future__</span> <span class="kn">import</span> <span class="n">annotations</span>
 
 <span class="kn">from</span> <span class="nn">collections</span> <span class="kn">import</span> <span class="n">deque</span>
@@ -490,7 +491,7 @@
     <span class="kn">from</span> <span class="nn">pygame.event</span> <span class="kn">import</span> <span class="n">Event</span>
 <span class="k">except</span> <span class="ne">ImportError</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
     <span class="k">raise</span> <span class="n">gym</span><span class="o">.</span><span class="n">error</span><span class="o">.</span><span class="n">DependencyNotInstalled</span><span class="p">(</span>
-        <span class="s2">&quot;pygame is not installed, run `pip install gymnasium[classic-control]`&quot;</span>
+        <span class="s1">&#39;pygame is not installed, run `pip install &quot;gymnasium[classic_control]&quot;`&#39;</span>
     <span class="p">)</span> <span class="kn">from</span> <span class="nn">e</span>
 
 <span class="k">try</span><span class="p">:</span>
@@ -499,7 +500,7 @@
     <span class="n">matplotlib</span><span class="o">.</span><span class="n">use</span><span class="p">(</span><span class="s2">&quot;TkAgg&quot;</span><span class="p">)</span>
     <span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
 <span class="k">except</span> <span class="ne">ImportError</span><span class="p">:</span>
-    <span class="n">logger</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span><span class="s2">&quot;matplotlib is not installed, run `pip install gymnasium[other]`&quot;</span><span class="p">)</span>
+    <span class="n">logger</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span><span class="s1">&#39;matplotlib is not installed, run `pip install &quot;gymnasium[other]&quot;`&#39;</span><span class="p">)</span>
     <span class="n">matplotlib</span><span class="p">,</span> <span class="n">plt</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span>
 
 
@@ -544,15 +545,13 @@
         <span class="bp">self</span><span class="p">,</span> <span class="n">keys_to_action</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">tuple</span><span class="p">[</span><span class="nb">int</span><span class="p">],</span> <span class="nb">int</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">set</span><span class="p">:</span>
         <span class="k">if</span> <span class="n">keys_to_action</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">env</span><span class="p">,</span> <span class="s2">&quot;get_keys_to_action&quot;</span><span class="p">):</span>
-                <span class="n">keys_to_action</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">env</span><span class="o">.</span><span class="n">get_keys_to_action</span><span class="p">()</span>
-            <span class="k">elif</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">env</span><span class="o">.</span><span class="n">unwrapped</span><span class="p">,</span> <span class="s2">&quot;get_keys_to_action&quot;</span><span class="p">):</span>
-                <span class="n">keys_to_action</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">env</span><span class="o">.</span><span class="n">unwrapped</span><span class="o">.</span><span class="n">get_keys_to_action</span><span class="p">()</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">env</span><span class="o">.</span><span class="n">has_wrapper_attr</span><span class="p">(</span><span class="s2">&quot;get_keys_to_action&quot;</span><span class="p">):</span>
+                <span class="n">keys_to_action</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">env</span><span class="o">.</span><span class="n">get_wrapper_attr</span><span class="p">(</span><span class="s2">&quot;get_keys_to_action&quot;</span><span class="p">)()</span>
             <span class="k">else</span><span class="p">:</span>
                 <span class="k">assert</span> <span class="bp">self</span><span class="o">.</span><span class="n">env</span><span class="o">.</span><span class="n">spec</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
                 <span class="k">raise</span> <span class="n">MissingKeysToAction</span><span class="p">(</span>
                     <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">env</span><span class="o">.</span><span class="n">spec</span><span class="o">.</span><span class="n">id</span><span class="si">}</span><span class="s2"> does not have explicit key to action mapping, &quot;</span>
-                    <span class="s2">&quot;please specify one manually&quot;</span>
+                    <span class="s2">&quot;please specify one manually, `play(env, keys_to_action=...)`&quot;</span>
                 <span class="p">)</span>
         <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">keys_to_action</span><span class="p">,</span> <span class="nb">dict</span><span class="p">)</span>
         <span class="n">relevant_keys</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="nb">sum</span><span class="p">((</span><span class="nb">list</span><span class="p">(</span><span class="n">k</span><span class="p">)</span> <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="n">keys_to_action</span><span class="o">.</span><span class="n">keys</span><span class="p">()),</span> <span class="p">[]))</span>
@@ -634,8 +633,11 @@
     <span class="n">keys_to_action</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">tuple</span><span class="p">[</span><span class="nb">str</span> <span class="o">|</span> <span class="nb">int</span><span class="p">,</span> <span class="o">...</span><span class="p">]</span> <span class="o">|</span> <span class="nb">str</span> <span class="o">|</span> <span class="nb">int</span><span class="p">,</span> <span class="n">ActType</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">seed</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">noop</span><span class="p">:</span> <span class="n">ActType</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
+    <span class="n">wait_on_player</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
 <span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Allows the user to play the environment using a keyboard.</span>
+
+<span class="sd">    If playing in a turn-based environment, set wait_on_player to True.</span>
 
 <span class="sd">    Args:</span>
 <span class="sd">        env: Environment to use for playing.</span>
@@ -684,21 +686,24 @@
 <span class="sd">            If ``None``, default ``key_to_action`` mapping for that environment is used, if provided.</span>
 <span class="sd">        seed: Random seed used when resetting the environment. If None, no seed is used.</span>
 <span class="sd">        noop: The action used when no key input has been entered, or the entered key combination is unknown.</span>
+<span class="sd">        wait_on_player: Play should wait for a user action</span>
 
 <span class="sd">    Example:</span>
+<span class="sd">        &gt;&gt;&gt; import gymnasium as gym</span>
+<span class="sd">        &gt;&gt;&gt; import numpy as np</span>
 <span class="sd">        &gt;&gt;&gt; from gymnasium.utils.play import play</span>
-<span class="sd">        &gt;&gt;&gt; play(gym.make(&quot;CarRacing-v2&quot;, render_mode=&quot;rgb_array&quot;),  # doctest: +SKIP</span>
+<span class="sd">        &gt;&gt;&gt; play(gym.make(&quot;CarRacing-v3&quot;, render_mode=&quot;rgb_array&quot;),  # doctest: +SKIP</span>
 <span class="sd">        ...     keys_to_action={</span>
-<span class="sd">        ...         &quot;w&quot;: np.array([0, 0.7, 0]),</span>
-<span class="sd">        ...         &quot;a&quot;: np.array([-1, 0, 0]),</span>
-<span class="sd">        ...         &quot;s&quot;: np.array([0, 0, 1]),</span>
-<span class="sd">        ...         &quot;d&quot;: np.array([1, 0, 0]),</span>
-<span class="sd">        ...         &quot;wa&quot;: np.array([-1, 0.7, 0]),</span>
-<span class="sd">        ...         &quot;dw&quot;: np.array([1, 0.7, 0]),</span>
-<span class="sd">        ...         &quot;ds&quot;: np.array([1, 0, 1]),</span>
-<span class="sd">        ...         &quot;as&quot;: np.array([-1, 0, 1]),</span>
+<span class="sd">        ...         &quot;w&quot;: np.array([0, 0.7, 0], dtype=np.float32),</span>
+<span class="sd">        ...         &quot;a&quot;: np.array([-1, 0, 0], dtype=np.float32),</span>
+<span class="sd">        ...         &quot;s&quot;: np.array([0, 0, 1], dtype=np.float32),</span>
+<span class="sd">        ...         &quot;d&quot;: np.array([1, 0, 0], dtype=np.float32),</span>
+<span class="sd">        ...         &quot;wa&quot;: np.array([-1, 0.7, 0], dtype=np.float32),</span>
+<span class="sd">        ...         &quot;dw&quot;: np.array([1, 0.7, 0], dtype=np.float32),</span>
+<span class="sd">        ...         &quot;ds&quot;: np.array([1, 0, 1], dtype=np.float32),</span>
+<span class="sd">        ...         &quot;as&quot;: np.array([-1, 0, 1], dtype=np.float32),</span>
 <span class="sd">        ...     },</span>
-<span class="sd">        ...     noop=np.array([0, 0, 0])</span>
+<span class="sd">        ...     noop=np.array([0, 0, 0], dtype=np.float32)</span>
 <span class="sd">        ... )</span>
 
 <span class="sd">        Above code works also if the environment is wrapped, so it&#39;s particularly useful in</span>
@@ -718,10 +723,8 @@
     <span class="n">env</span><span class="o">.</span><span class="n">reset</span><span class="p">(</span><span class="n">seed</span><span class="o">=</span><span class="n">seed</span><span class="p">)</span>
 
     <span class="k">if</span> <span class="n">keys_to_action</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">env</span><span class="p">,</span> <span class="s2">&quot;get_keys_to_action&quot;</span><span class="p">):</span>
-            <span class="n">keys_to_action</span> <span class="o">=</span> <span class="n">env</span><span class="o">.</span><span class="n">get_keys_to_action</span><span class="p">()</span>
-        <span class="k">elif</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">env</span><span class="o">.</span><span class="n">unwrapped</span><span class="p">,</span> <span class="s2">&quot;get_keys_to_action&quot;</span><span class="p">):</span>
-            <span class="n">keys_to_action</span> <span class="o">=</span> <span class="n">env</span><span class="o">.</span><span class="n">unwrapped</span><span class="o">.</span><span class="n">get_keys_to_action</span><span class="p">()</span>
+        <span class="k">if</span> <span class="n">env</span><span class="o">.</span><span class="n">has_wrapper_attr</span><span class="p">(</span><span class="s2">&quot;get_keys_to_action&quot;</span><span class="p">):</span>
+            <span class="n">keys_to_action</span> <span class="o">=</span> <span class="n">env</span><span class="o">.</span><span class="n">get_wrapper_attr</span><span class="p">(</span><span class="s2">&quot;get_keys_to_action&quot;</span><span class="p">)()</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="k">assert</span> <span class="n">env</span><span class="o">.</span><span class="n">spec</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
             <span class="k">raise</span> <span class="n">MissingKeysToAction</span><span class="p">(</span>
@@ -761,7 +764,7 @@
         <span class="k">if</span> <span class="n">done</span><span class="p">:</span>
             <span class="n">done</span> <span class="o">=</span> <span class="kc">False</span>
             <span class="n">obs</span> <span class="o">=</span> <span class="n">env</span><span class="o">.</span><span class="n">reset</span><span class="p">(</span><span class="n">seed</span><span class="o">=</span><span class="n">seed</span><span class="p">)</span>
-        <span class="k">else</span><span class="p">:</span>
+        <span class="k">elif</span> <span class="n">wait_on_player</span> <span class="ow">is</span> <span class="kc">False</span> <span class="ow">or</span> <span class="nb">len</span><span class="p">(</span><span class="n">game</span><span class="o">.</span><span class="n">pressed_keys</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
             <span class="n">action</span> <span class="o">=</span> <span class="n">key_code_to_action</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="nb">tuple</span><span class="p">(</span><span class="nb">sorted</span><span class="p">(</span><span class="n">game</span><span class="o">.</span><span class="n">pressed_keys</span><span class="p">)),</span> <span class="n">noop</span><span class="p">)</span>
             <span class="n">prev_obs</span> <span class="o">=</span> <span class="n">obs</span>
             <span class="n">obs</span><span class="p">,</span> <span class="n">rew</span><span class="p">,</span> <span class="n">terminated</span><span class="p">,</span> <span class="n">truncated</span><span class="p">,</span> <span class="n">info</span> <span class="o">=</span> <span class="n">env</span><span class="o">.</span><span class="n">step</span><span class="p">(</span><span class="n">action</span><span class="p">)</span>
@@ -839,7 +842,7 @@
 
         <span class="k">if</span> <span class="n">plt</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="k">raise</span> <span class="n">DependencyNotInstalled</span><span class="p">(</span>
-                <span class="s2">&quot;matplotlib is not installed, run `pip install gymnasium[other]`&quot;</span>
+                <span class="s1">&#39;matplotlib is not installed, run `pip install &quot;gymnasium[other]&quot;`&#39;</span>
             <span class="p">)</span>
 
         <span class="n">num_plots</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">plot_names</span><span class="p">)</span>
@@ -894,7 +897,7 @@
 
         <span class="k">if</span> <span class="n">plt</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="k">raise</span> <span class="n">DependencyNotInstalled</span><span class="p">(</span>
-                <span class="s2">&quot;matplotlib is not installed, run `pip install gymnasium[other]`&quot;</span>
+                <span class="s1">&#39;matplotlib is not installed, run `pip install &quot;gymnasium[other]&quot;`&#39;</span>
             <span class="p">)</span>
         <span class="n">plt</span><span class="o">.</span><span class="n">pause</span><span class="p">(</span><span class="mf">0.000001</span><span class="p">)</span></div>
 </div>
@@ -1016,8 +1019,8 @@
         })()
       </script>
 
-    <script src="../../../../_static/documentation_options.js?v=ed34540e"></script>
-    <script src="../../../../_static/doctools.js?v=888ff710"></script>
+    <script src="../../../../_static/documentation_options.js?v=3596a5a1"></script>
+    <script src="../../../../_static/doctools.js?v=9a2dae69"></script>
     <script src="../../../../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../../../../_static/scripts/furo.js?v=7660844c"></script>
     

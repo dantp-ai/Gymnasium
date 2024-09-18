@@ -10,7 +10,7 @@
     <meta property="og:url" content="https://gymnasium.farama.org/genindex.html" /><meta property="og:image" content="https://gymnasium.farama.org/_static/img/gymnasium-github.png" /><meta name="twitter:card" content="summary_large_image"><link rel="index" title="Index" href="#" /><link rel="search" title="Search" href="../search/" />
         <link rel="canonical" href="https://gymnasium.farama.org/genindex.html" />
 
-    <link rel="shortcut icon" href="../_static/favicon.png"/><!-- Generated with Sphinx 7.2.6 and Furo 2023.08.19.dev1 --><title>Index - Gymnasium Documentation</title>
+    <link rel="shortcut icon" href="../_static/favicon.png"/><!-- Generated with Sphinx 7.4.7 and Furo 2023.08.19.dev1 --><title>Index - Gymnasium Documentation</title>
 <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=a746c00c" />
     <link rel="stylesheet" type="text/css" href="../_static/styles/furo.css?v=3e7f4c72" />
     <link rel="stylesheet" type="text/css" href="../_static/sg_gallery.css?v=61a4c737" />
@@ -394,7 +394,7 @@
 <li class="toctree-l2"><a class="reference internal" href="../environments/atari/zaxxon/">Zaxxon</a></li>
 </ul>
 </li>
-<li class="toctree-l1"><a class="reference internal" href="../environments/third_party_environments/">Third-Party Environments</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../environments/third_party_environments/">External Environments</a></li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">Tutorials</span></p>
 <ul>
@@ -413,11 +413,11 @@
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="../tutorials/third-party-tutorials/">Third-Party Tutorials</a></li>
-<li class="toctree-l1"><a class="reference external" href="https://www.comet.com/docs/v2/integrations/ml-frameworks/gymnasium/?utm_source=gymnasium&amp;utm_medium=partner&amp;utm_campaign=partner_gymnasium_2023&amp;utm_content=docs_gymnasium">Comet Tutorial</a></li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">Development</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference external" href="https://github.com/Farama-Foundation/Gymnasium">Github</a></li>
+<li class="toctree-l1"><a class="reference external" href="https://arxiv.org/abs/2407.17032">Paper</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../gymnasium_release_notes/">Gymnasium Release Notes</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../gym_release_notes/">Gym Release Notes</a></li>
 <li class="toctree-l1"><a class="reference external" href="https://github.com/Farama-Foundation/Gymnasium/blob/main/docs/README.md">Contribute to the Docs</a></li>
@@ -511,8 +511,14 @@
     <td style="width: 33%; vertical-align: top;"><ul>
         <li><a href="../api/vector/utils/#gymnasium.vector.utils.batch_space">batch_space() (in module gymnasium.vector.utils)</a>
 </li>
+        <li><a href="../api/utils/#gymnasium.utils.performance.benchmark_init">benchmark_init() (in module gymnasium.utils.performance)</a>
+</li>
     </ul></td>
     <td style="width: 33%; vertical-align: top;"><ul>
+        <li><a href="../api/utils/#gymnasium.utils.performance.benchmark_render">benchmark_render() (in module gymnasium.utils.performance)</a>
+</li>
+        <li><a href="../api/utils/#gymnasium.utils.performance.benchmark_step">benchmark_step() (in module gymnasium.utils.performance)</a>
+</li>
         <li><a href="../api/spaces/fundamental/#gymnasium.spaces.Box">Box (class in gymnasium.spaces)</a>
 </li>
     </ul></td>
@@ -647,10 +653,10 @@
 </li>
         <li><a href="../api/spaces/utils/#gymnasium.spaces.utils.flatten">flatten() (in module gymnasium.spaces.utils)</a>
 </li>
-        <li><a href="../api/spaces/utils/#gymnasium.spaces.utils.flatten_space">flatten_space() (in module gymnasium.spaces.utils)</a>
-</li>
     </ul></td>
     <td style="width: 33%; vertical-align: top;"><ul>
+        <li><a href="../api/spaces/utils/#gymnasium.spaces.utils.flatten_space">flatten_space() (in module gymnasium.spaces.utils)</a>
+</li>
         <li><a href="../api/wrappers/observation_wrappers/#gymnasium.wrappers.FlattenObservation">FlattenObservation (class in gymnasium.wrappers)</a>
 
         <ul>
@@ -660,8 +666,6 @@
         <li><a href="../api/wrappers/observation_wrappers/#gymnasium.wrappers.FrameStackObservation">FrameStackObservation (class in gymnasium.wrappers)</a>
 </li>
         <li><a href="../api/spaces/#gymnasium.spaces.Space.from_jsonable">from_jsonable() (gymnasium.spaces.Space method)</a>
-</li>
-        <li><a href="../api/functional/#gymnasium.functional.FuncEnv">FuncEnv (class in gymnasium.functional)</a>
 </li>
         <li><a href="../api/functional/#gymnasium.envs.functional_jax_env.FunctionalJaxEnv">FunctionalJaxEnv (class in gymnasium.envs.functional_jax_env)</a>
 </li>
@@ -725,8 +729,6 @@
   <h2>I</h2>
   <table style="width: 100%" class="indextable genindextable"><tr>
     <td style="width: 33%; vertical-align: top;"><ul>
-        <li><a href="../api/functional/#gymnasium.functional.FuncEnv.initial">initial() (gymnasium.functional.FuncEnv method)</a>
-</li>
         <li><a href="../api/spaces/fundamental/#gymnasium.spaces.Box.is_bounded">is_bounded() (gymnasium.spaces.Box method)</a>
 </li>
     </ul></td>
@@ -784,6 +786,8 @@
         <li><a href="../api/env/#gymnasium.Env.metadata">metadata (gymnasium.Env attribute)</a>
 
         <ul>
+          <li><a href="../api/vector/#gymnasium.vector.VectorEnv.metadata">(gymnasium.vector.VectorEnv attribute)</a>
+</li>
           <li><a href="../api/wrappers/#gymnasium.Wrapper.metadata">(gymnasium.Wrapper property)</a>
 </li>
         </ul></li>
@@ -829,7 +833,11 @@
         <ul>
           <li><a href="../api/spaces/#gymnasium.spaces.Space.np_random">(gymnasium.spaces.Space property)</a>
 </li>
-          <li><a href="../api/vector/#gymnasium.vector.VectorEnv.np_random">(gymnasium.vector.VectorEnv property)</a>, <a href="../api/vector/async_vector_env/#gymnasium.vector.VectorEnv.np_random">[1]</a>, <a href="../api/vector/sync_vector_env/#gymnasium.vector.VectorEnv.np_random">[2]</a>
+          <li><a href="../api/vector/async_vector_env/#gymnasium.vector.AsyncVectorEnv.np_random">(gymnasium.vector.AsyncVectorEnv property)</a>
+</li>
+          <li><a href="../api/vector/sync_vector_env/#gymnasium.vector.SyncVectorEnv.np_random">(gymnasium.vector.SyncVectorEnv property)</a>
+</li>
+          <li><a href="../api/vector/#gymnasium.vector.VectorEnv.np_random">(gymnasium.vector.VectorEnv property)</a>
 </li>
           <li><a href="../api/wrappers/#gymnasium.Wrapper.np_random">(gymnasium.Wrapper property)</a>
 </li>
@@ -841,7 +849,11 @@
         <li><a href="../api/env/#gymnasium.Env.np_random_seed">np_random_seed (gymnasium.Env property)</a>
 
         <ul>
-          <li><a href="../api/vector/#gymnasium.vector.VectorEnv.np_random_seed">(gymnasium.vector.VectorEnv property)</a>, <a href="../api/vector/async_vector_env/#gymnasium.vector.VectorEnv.np_random_seed">[1]</a>, <a href="../api/vector/sync_vector_env/#gymnasium.vector.VectorEnv.np_random_seed">[2]</a>
+          <li><a href="../api/vector/async_vector_env/#gymnasium.vector.AsyncVectorEnv.np_random_seed">(gymnasium.vector.AsyncVectorEnv property)</a>
+</li>
+          <li><a href="../api/vector/sync_vector_env/#gymnasium.vector.SyncVectorEnv.np_random_seed">(gymnasium.vector.SyncVectorEnv property)</a>
+</li>
+          <li><a href="../api/vector/#gymnasium.vector.VectorEnv.np_random_seed">(gymnasium.vector.VectorEnv property)</a>
 </li>
           <li><a href="../api/wrappers/#gymnasium.Wrapper.np_random_seed">(gymnasium.Wrapper property)</a>
 </li>
@@ -862,12 +874,8 @@
   <h2>O</h2>
   <table style="width: 100%" class="indextable genindextable"><tr>
     <td style="width: 33%; vertical-align: top;"><ul>
-        <li><a href="../api/functional/#gymnasium.functional.FuncEnv.observation">observation() (gymnasium.functional.FuncEnv method)</a>
-
-        <ul>
-          <li><a href="../api/wrappers/observation_wrappers/#gymnasium.ObservationWrapper.observation">(gymnasium.ObservationWrapper method)</a>
+        <li><a href="../api/wrappers/observation_wrappers/#gymnasium.ObservationWrapper.observation">observation() (gymnasium.ObservationWrapper method)</a>
 </li>
-        </ul></li>
         <li><a href="../api/env/#gymnasium.Env.observation_space">observation_space (gymnasium.Env attribute)</a>
 
         <ul>
@@ -944,12 +952,6 @@
           <li><a href="../api/wrappers/#gymnasium.Wrapper.render">(gymnasium.Wrapper method)</a>
 </li>
         </ul></li>
-        <li><a href="../api/functional/#gymnasium.functional.FuncEnv.render_close">render_close() (gymnasium.functional.FuncEnv method)</a>
-</li>
-        <li><a href="../api/functional/#gymnasium.functional.FuncEnv.render_image">render_image() (gymnasium.functional.FuncEnv method)</a>
-</li>
-        <li><a href="../api/functional/#gymnasium.functional.FuncEnv.render_init">render_init() (gymnasium.functional.FuncEnv method)</a>
-</li>
         <li><a href="../api/env/#gymnasium.Env.render_mode">render_mode (gymnasium.Env attribute)</a>
 
         <ul>
@@ -1000,12 +1002,8 @@
           <li><a href="../api/vector/wrappers/#gymnasium.wrappers.vector.ResizeObservation">(class in gymnasium.wrappers.vector)</a>
 </li>
         </ul></li>
-        <li><a href="../api/functional/#gymnasium.functional.FuncEnv.reward">reward() (gymnasium.functional.FuncEnv method)</a>
-
-        <ul>
-          <li><a href="../api/wrappers/reward_wrappers/#gymnasium.RewardWrapper.reward">(gymnasium.RewardWrapper method)</a>
+        <li><a href="../api/wrappers/reward_wrappers/#gymnasium.RewardWrapper.reward">reward() (gymnasium.RewardWrapper method)</a>
 </li>
-        </ul></li>
         <li><a href="../api/vector/wrappers/#gymnasium.vector.VectorRewardWrapper.rewards">rewards() (gymnasium.vector.VectorRewardWrapper method)</a>
 </li>
         <li><a href="../api/wrappers/reward_wrappers/#gymnasium.RewardWrapper">RewardWrapper (class in gymnasium)</a>
@@ -1098,8 +1096,6 @@
         </ul></li>
         <li><a href="../api/registry/#gymnasium.spec">spec() (in module gymnasium)</a>
 </li>
-        <li><a href="../api/functional/#gymnasium.functional.FuncEnv.state_info">state_info() (gymnasium.functional.FuncEnv method)</a>
-</li>
         <li><a href="../api/env/#gymnasium.Env.step">step() (gymnasium.Env method)</a>
 
         <ul>
@@ -1130,8 +1126,6 @@
   <h2>T</h2>
   <table style="width: 100%" class="indextable genindextable"><tr>
     <td style="width: 33%; vertical-align: top;"><ul>
-        <li><a href="../api/functional/#gymnasium.functional.FuncEnv.terminal">terminal() (gymnasium.functional.FuncEnv method)</a>
-</li>
         <li><a href="../api/spaces/fundamental/#gymnasium.spaces.Text">Text (class in gymnasium.spaces)</a>
 </li>
         <li><a href="../api/wrappers/observation_wrappers/#gymnasium.wrappers.TimeAwareObservation">TimeAwareObservation (class in gymnasium.wrappers)</a>
@@ -1139,8 +1133,6 @@
         <li><a href="../api/wrappers/misc_wrappers/#gymnasium.wrappers.TimeLimit">TimeLimit (class in gymnasium.wrappers)</a>
 </li>
         <li><a href="../api/spaces/#gymnasium.spaces.Space.to_jsonable">to_jsonable() (gymnasium.spaces.Space method)</a>
-</li>
-        <li><a href="../api/functional/#gymnasium.functional.FuncEnv.transform">transform() (gymnasium.functional.FuncEnv method)</a>
 </li>
         <li><a href="../api/wrappers/action_wrappers/#gymnasium.wrappers.TransformAction">TransformAction (class in gymnasium.wrappers)</a>
 
@@ -1162,10 +1154,6 @@
           <li><a href="../api/vector/wrappers/#gymnasium.wrappers.vector.TransformReward">(class in gymnasium.wrappers.vector)</a>
 </li>
         </ul></li>
-        <li><a href="../api/functional/#gymnasium.functional.FuncEnv.transition">transition() (gymnasium.functional.FuncEnv method)</a>
-</li>
-        <li><a href="../api/functional/#gymnasium.functional.FuncEnv.transition_info">transition_info() (gymnasium.functional.FuncEnv method)</a>
-</li>
         <li><a href="../api/spaces/composite/#gymnasium.spaces.Tuple">Tuple (class in gymnasium.spaces)</a>
 </li>
     </ul></td>
@@ -1351,8 +1339,8 @@
         })()
       </script>
 
-    <script src="../_static/documentation_options.js?v=ed34540e"></script>
-    <script src="../_static/doctools.js?v=888ff710"></script>
+    <script src="../_static/documentation_options.js?v=3596a5a1"></script>
+    <script src="../_static/doctools.js?v=9a2dae69"></script>
     <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../_static/scripts/furo.js?v=7660844c"></script>
     
